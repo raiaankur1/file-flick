@@ -6,16 +6,18 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 
 from .serializers import UserSerializer, UploadSerializer
-from .utilities import generate_s3_download_url, delete_s3_object
+from .utilities import generate_s3_download_url, delete_s3_object, get_s3_file
 from .models import Upload, URL
 
 @api_view(['POST'])
 def login(request):
+  print(request)
   user = get_object_or_404(User, username=request.data['username'])
   if not user.check_password(request.data['password']):
-    return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+    return Response({"msg": "Not found."}, status=status.HTTP_404_NOT_FOUND)
   token, created = Token.objects.get_or_create(user=user)
   serializer = UserSerializer(instance=user)
   return Response({"token": token.key, "user": serializer.data})
@@ -112,7 +114,18 @@ def download(request, shortuid):
   if url_object is None:
     return Response({'message': 'Not Found!'}, status=status.HTTP_400_BAD_REQUEST)
   else:
-    return Response({})
+    upload_object = url_object.upload
+    filename = upload_object.filename
+
+    bucket_name = 'file-flick'
+    object_key = 'uploads/{}.{}'.format(url_object.uid,filename.split('.')[-1])
+    content = get_s3_file(bucket_name, object_key)
+    if content is not None:
+      response = HttpResponse(content, content_type='application/octet-stream')
+      response['Content-Disposition'] = f'attachment; filename="{filename}"'
+      return response
+    
+    return HttpResponse("No AWS credentials found.", status=500)
 
 
 @api_view(['DELETE'])

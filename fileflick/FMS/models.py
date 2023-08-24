@@ -20,7 +20,6 @@ class ShortUUIDField(models.UUIDField):
         super().__init__(*args, **kwargs)
 
 
-
 class URL(models.Model):
     uid = models.UUIDField(primary_key=True, editable=False, default=uuid4)
     short_uid = ShortUUIDField()
@@ -28,8 +27,8 @@ class URL(models.Model):
 
 
 def get_upload_path(instance, filename):
-  filename = '{}.{}'.format(str(instance.url.uid),filename.split('.')[-1])
-  return os.path.join("uploads/", filename)
+    filename = '{}.{}'.format(str(instance.url.uid), filename.split('.')[-1])
+    return os.path.join("uploads/", filename)
 
 
 class Upload(models.Model):

@@ -8,11 +8,6 @@ class UserSerializer(serializers.ModelSerializer):
     fields = ['username', 'password', 'email']
 
 
-# class UploadSerializer(serializers.ModelSerializer):
-#   class Meta:
-#     model = Upload
-#     fields = ('owner', 'file', 'filename')
-
 class UploadSerializer(serializers.Serializer):
   url = serializers.CharField(required = False)
   owner = serializers.CharField(allow_null = True)
