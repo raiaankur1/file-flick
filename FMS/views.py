@@ -20,7 +20,9 @@ def login(request):
     return Response({"msg": "Not found."}, status=status.HTTP_404_NOT_FOUND)
   token, created = Token.objects.get_or_create(user=user)
   serializer = UserSerializer(instance=user)
-  response = Response({"token": token.key, "user": serializer.data.username})
+  # try:
+  #   # user = serializer.data.get()
+  response = Response({"token": token.key, "user": serializer.data.get('username')})
   response['Access-Control-Allow-Origin'] = '*'
   response['Cross-Origin-Opener-Policy'] = '*'
   return response
@@ -41,7 +43,7 @@ def signup(request):
     user.set_password(request.data['password'])
     user.save()
     token = Token.objects.create(user=user)
-    return Response({"token": token.key, "user": serializer.data.username})
+    return Response({"token": token.key, "user": serializer.data.get('username')})
   print(serializer.errors)
   return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
