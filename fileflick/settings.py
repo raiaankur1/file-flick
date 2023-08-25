@@ -27,9 +27,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static/build'),
-]
 
 ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_ALLOW_ALL = True
@@ -49,6 +46,7 @@ INSTALLED_APPS = [
 
     'storages',
     'corsheaders',
+    'webpack_loader',
 ]
 
 MIDDLEWARE = [
@@ -68,8 +66,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'static'),
-            os.path.join(BASE_DIR, 'static/build'),
+            os.path.join(BASE_DIR, 'reactclient/build'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -139,7 +136,9 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATIC_FILES_DIR = [os.path.join(BASE_DIR, 'static/build')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'reactclient/build/static'),
+]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'

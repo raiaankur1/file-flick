@@ -12,8 +12,8 @@ from .serializers import UserSerializer, UploadSerializer
 from .utilities import generate_s3_download_url, delete_s3_object, get_s3_file
 from .models import Upload, URL
 
-def react_app(request):
-    return render(request, 'build/index.html')
+def index(request):
+    return render(request, 'index.html')
 
 @api_view(['POST'])
 def login(request):
