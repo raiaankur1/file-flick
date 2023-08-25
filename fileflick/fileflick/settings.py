@@ -17,12 +17,12 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATABASE_URL = "postgresql://postgres:MkZUT5CSsnJO30EDhy23@containers-us-west-196.railway.app:5778/railway"
+DATABASE_URL = os.environ.get('DATABASE_URL')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-32g*2y^^%p=1^41d*ilgdzqrcr3_c(wogm=aa!)&xw@69ws=2!'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -146,9 +146,6 @@ AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = 'file-flick'
 
-if DEBUG:
-    AWS_ACCESS_KEY_ID = 'AKIA2PKCP3MNBEAPJ4VJ'
-    AWS_SECRET_ACCESS_KEY = '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'
 
 AWS_S3_FILE_OVERWRITE = True
 AWS_DEFAULT_ACL = None
