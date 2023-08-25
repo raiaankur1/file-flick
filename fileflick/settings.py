@@ -67,7 +67,10 @@ ROOT_URLCONF = 'fileflick.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'static'),
+            os.path.join(BASE_DIR, 'static/build'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
