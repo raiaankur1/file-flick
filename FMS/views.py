@@ -5,13 +5,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseNotFound
 
 from .serializers import UserSerializer, UploadSerializer
 from .utilities import generate_s3_download_url, delete_s3_object, get_s3_file
 from .models import Upload, URL
 
+def react_app(request):
+    return render(request, 'build/index.html')
 
 @api_view(['POST'])
 def login(request):
