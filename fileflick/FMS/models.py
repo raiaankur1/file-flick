@@ -1,28 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 from uuid import uuid4
-import shortuuid
+from shortuuid.django_fields import ShortUUIDField
 import os
-
-
 from django.db import models
-
-
-class ShortUUIDField(models.UUIDField):
-    def create_uuid(self):
-        return shortuuid.uuid()
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('default', self.create_uuid)
-        kwargs.setdefault('editable', False)
-        kwargs.setdefault('unique', True)
-        kwargs.setdefault('max_length', 10)
-        super().__init__(*args, **kwargs)
 
 
 class URL(models.Model):
     uid = models.UUIDField(primary_key=True, editable=False, default=uuid4)
-    short_uid = ShortUUIDField()
+    short_uid = ShortUUIDField(
+        unique=True, editable=False, length=12, max_length=12)
     original_url = models.URLField(blank=True, null=True)
 
 

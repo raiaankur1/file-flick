@@ -14,13 +14,23 @@ from .models import Upload, URL
 
 @api_view(['POST'])
 def login(request):
-  print(request)
+  # print(request.data)
   user = get_object_or_404(User, username=request.data['username'])
   if not user.check_password(request.data['password']):
     return Response({"msg": "Not found."}, status=status.HTTP_404_NOT_FOUND)
   token, created = Token.objects.get_or_create(user=user)
   serializer = UserSerializer(instance=user)
-  return Response({"token": token.key, "user": serializer.data})
+  response = Response({"token": token.key, "user": serializer.data})
+  response['Access-Control-Allow-Origin'] = '*'
+  response['Cross-Origin-Opener-Policy'] = '*'
+  return response
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user(request):
+  user = request.user
+  return Response({'username': user.username})
 
 @api_view(['POST'])
 def signup(request):
@@ -32,14 +42,17 @@ def signup(request):
     user.save()
     token = Token.objects.create(user=user)
     return Response({"token": token.key, "user": serializer.data})
+  print(serializer.errors)
   return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 def guest_upload(request):
   try:
-    request.data['owner'] = None
     data = request.data
+    data._mutable = True
+    data['owner'] = None
+    
     # print(request.data)
     serializer = UploadSerializer(data=data)
     if serializer.is_valid():
@@ -61,7 +74,7 @@ def guest_upload(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   except Exception as e:
     print(e)
-    return Response({}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    return Response({'url': 'Internal Server Error'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 @api_view(['POST'])
@@ -100,6 +113,7 @@ def user_upload(request):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def recent(request):
+  print(request.user)
   try:
     uploads = request.user.uploads
   except:
@@ -108,8 +122,9 @@ def recent(request):
   serializer = UploadSerializer(uploads, many=True)
   return Response({"uploads": serializer.data})
 
-
+@api_view(['GET'])
 def download(request, shortuid):
+  print(shortuid)
   url_object = URL.objects.get(short_uid=shortuid)
   if url_object is None:
     return Response({'message': 'Not Found!'}, status=status.HTTP_400_BAD_REQUEST)

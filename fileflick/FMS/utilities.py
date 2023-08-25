@@ -3,7 +3,8 @@ from botocore.exceptions import NoCredentialsError
 
 
 def get_s3_file(bucket_name, object_key):
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client('s3', aws_access_key_id='AKIA2PKCP3MNBEAPJ4VJ',
+                             aws_secret_access_key='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')
     try:
         response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
         content = response['Body'].read()
@@ -19,8 +20,8 @@ def get_s3_file(bucket_name, object_key):
 
 
 def generate_s3_download_url(bucket_name, object_key):
-    s3_client = boto3.client('s3', aws_access_key_id='AKIA2PKCP3MNBSEF24XK',
-                             aws_secret_access_key='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')
+    s3_client = boto3.client('s3', aws_access_key_id='AKIA2PKCP3MNBEAPJ4VJ',
+                             aws_secret_access_key='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')
     try:
         response = s3_client.generate_presigned_url(
             'get_object',
@@ -37,10 +38,10 @@ def generate_s3_download_url(bucket_name, object_key):
 
 
 def delete_s3_object(bucket_name, object_key):
-    s3_client = boto3.client('s3', aws_access_key_id='AKIA2PKCP3MNBSEF24XK',
-                             aws_secret_access_key='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')
+    s3_client = boto3.client('s3', aws_access_key_id='AKIA2PKCP3MNBEAPJ4VJ',
+                             aws_secret_access_key='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')
     try:
-        response = s3_client.delete_object(Bucket= bucket_name, Key= object_key)
+        response = s3_client.delete_object(Bucket=bucket_name, Key=object_key)
         return True
     except NoCredentialsError as err:
         print(err)
