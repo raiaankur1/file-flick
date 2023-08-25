@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 
 from .serializers import UserSerializer, UploadSerializer
 from .utilities import generate_s3_download_url, delete_s3_object, get_s3_file
@@ -20,7 +20,7 @@ def login(request):
     return Response({"msg": "Not found."}, status=status.HTTP_404_NOT_FOUND)
   token, created = Token.objects.get_or_create(user=user)
   serializer = UserSerializer(instance=user)
-  response = Response({"token": token.key, "user": serializer.data})
+  response = Response({"token": token.key, "user": serializer.data.username})
   response['Access-Control-Allow-Origin'] = '*'
   response['Cross-Origin-Opener-Policy'] = '*'
   return response
@@ -41,7 +41,7 @@ def signup(request):
     user.set_password(request.data['password'])
     user.save()
     token = Token.objects.create(user=user)
-    return Response({"token": token.key, "user": serializer.data})
+    return Response({"token": token.key, "user": serializer.data.username})
   print(serializer.errors)
   return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -70,7 +70,9 @@ def guest_upload(request):
       url_object.original_url = download_url
       url_object.save()
 
-      return Response({'url': url_object.original_url, 'owner': serializer.data['owner'], 'filename': serializer.data['filename']}, status=status.HTTP_201_CREATED)
+      short_url = "https://file-flick.up.railway.app/FMS/download/" + str(url_object.shortuid)
+
+      return Response({'url': short_url, 'owner': serializer.data['owner'], 'filename': serializer.data['filename']}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   except Exception as e:
     print(e)
@@ -102,7 +104,9 @@ def user_upload(request):
       url_object.original_url = download_url
       url_object.save()
 
-      return Response({'url': url_object.original_url, 'owner': serializer.data['owner'], 'filename': serializer.data['filename']}, status=status.HTTP_201_CREATED)
+      short_url = "https://file-flick.up.railway.app/FMS/download/" + str(url_object.shortuid)
+
+      return Response({'url': short_url, 'owner': serializer.data['owner'], 'filename': serializer.data['filename']}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   except Exception as e:
     print(e)
@@ -122,25 +126,27 @@ def recent(request):
   serializer = UploadSerializer(uploads, many=True)
   return Response({"uploads": serializer.data})
 
-@api_view(['GET'])
-def download(request, shortuid):
-  print(shortuid)
-  url_object = URL.objects.get(short_uid=shortuid)
-  if url_object is None:
-    return Response({'message': 'Not Found!'}, status=status.HTTP_400_BAD_REQUEST)
-  else:
-    upload_object = url_object.upload
-    filename = upload_object.filename
 
-    bucket_name = 'file-flick'
-    object_key = 'uploads/{}.{}'.format(url_object.uid,filename.split('.')[-1])
-    content = get_s3_file(bucket_name, object_key)
-    if content is not None:
-      response = HttpResponse(content, content_type='application/octet-stream')
-      response['Content-Disposition'] = f'attachment; filename="{filename}"'
-      return response
-    
-    return HttpResponse("No AWS credentials found.", status=500)
+def download(request, shortuid):
+  if request.method == "GET":
+    print(shortuid)
+    url_object = URL.objects.get(short_uid=shortuid)
+    if url_object is None:
+      return Response({'message': 'Not Found!'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+      upload_object = url_object.upload
+      filename = upload_object.filename
+
+      bucket_name = 'file-flick'
+      object_key = 'uploads/{}.{}'.format(url_object.uid,filename.split('.')[-1])
+      content = get_s3_file(bucket_name, object_key)
+      if content is not None:
+        response = HttpResponse(content, content_type='application/octet-stream')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+      
+      return HttpResponse("No AWS credentials found.", status=500)
+  return HttpResponseNotFound("Not Found!")
 
 
 @api_view(['DELETE'])

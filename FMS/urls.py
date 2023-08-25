@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import re_path, path
 from . import views
 
 urlpatterns = [
@@ -9,5 +9,5 @@ urlpatterns = [
   re_path('guestupload', views.guest_upload),
   re_path('recent', views.recent),
   re_path('delete', views.delete_upload),
-  re_path('download/<str:shortuid>', views.download),
+  path('download/<str:shortuid>', views.download),
 ]
